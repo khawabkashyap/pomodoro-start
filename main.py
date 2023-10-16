@@ -1,4 +1,3 @@
-import tkinter
 from tkinter import *
 import math
 
@@ -8,15 +7,24 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 1
-SHORT_BREAK_MIN = 2
-LONG_BREAK_MIN = 1
+WORK_MIN = 25
+SHORT_BREAK_MIN = 5
+LONG_BREAK_MIN = 20
 REPS = 0
+timer = None
 
 
 # ---------------------------- TIMER RESET ------------------------------- #
+def reset_timer():
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="00:00")
+    timer_label.config(text="Timer")
+    tick_label.config(text="")
+    global REPS
+    REPS = 0
 
-# ---------------------------- TIMER MECHANISM ------------------------------- # 
+
+# ---------------------------- TIMER MECHANISM ------------------------------- #
 def start_timer():
     global REPS
     REPS += 1
@@ -25,6 +33,7 @@ def start_timer():
     long_break_sec = LONG_BREAK_MIN * 60
 
     if REPS % 2 != 0:
+        timer_label["text"] = "Work"
         count_down(work_sec)
 
     elif REPS % 2 == 0:
@@ -54,11 +63,15 @@ def count_down(count):
     canvas.itemconfig(timer_text, text=f"{minute_count}:{second_count}")
 
     if count > 0:
-        canvas.after(1000, count_down, count - 1)
+        global timer
+        timer = canvas.after(1000, count_down, count - 1)
     else:
+        window.lift()
+        window.attributes('-topmost', True)
+        window.attributes('-topmost', False)
         start_timer()
         if REPS % 2 == 0:
-            ticks = "✔ " * (REPS-1)
+            ticks = "✔ " * (REPS - 1)
             tick_label.config(text=ticks)
 
 
@@ -83,7 +96,7 @@ start_button.grid(column=1, row=3)
 tick_label = Label(fg=GREEN, font=(FONT_NAME, 35, "bold"), highlightthickness=0, bg=YELLOW)
 tick_label.grid(column=2, row=4)
 
-reset_button = Button(text="Reset", highlightthickness=0)
+reset_button = Button(text="Reset", highlightthickness=0, command=reset_timer)
 reset_button.grid(column=3, row=3)
 
 window.mainloop()
